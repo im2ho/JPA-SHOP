@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+	<head>
+		<meta charset="UTF-8">
+		<title>상품 목록</title>
+		<style>
+		.item-container{
+			max-width: 900px;
+			margin: 0 auto;
+		}
+		.item{
+			float:left;
+			width:200px;
+			border:1px solid #ccc;
+			padding: 10px;
+			text-align: center;
+			margin:10px;
+		}
+		.item img{
+			width:100%;
+			height:auto;
+		}
+		</style>
+		<script>
+			function likeProduct(productId){
+				alert("상품을 찜했습니다." + productId);
+			}
+		</script>
+	</head>
+	<body>
+		<h1>상품 목록</h1>
+		<div th:if="${#authorization.expression('isAuthenticated()')}">
+			<p th:text="'안녕하세요, ' + ${#authentication.name} +'님, 환영합니다.'"></p>
+		</div>
+		<a th:href="@{/}">Home</a>
+		<!--<a th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}" th:href="@{/product/new}">상품 등록</a><br>-->
+		<a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/product/new}">상품 등록</a><br>
+		<a th:href = "@{/cart}">장바구니인데 아직 안만들었어요</a>
+		<div class="item-container">
+			<div class="item">
+				<div th:each="product:${products}"><br>
+					<div>
+						<img th:src="@{${product.getImgPath()}}" style="width: 100%;">
+					</div>
+					<label>제품명 : </label>
+					<span th:text="${product.name}"></span><br>
+					
+					<label>가격 : </label>
+					<span th:text="${product.price}"></span><br>
+					
+					<button th:if="${#authorization.expression('isAuthenticated()')}"
+							th:onclick="'likeProduct(' +${product.id}+ ')'" type="button"
+							>찜하기</button>
+					<span th:text="${product.likes}"></span>likes
+						
+					<a th:href="@{/product/detail/{id}(id=${product.id})}">상세보기</a>
+					
+					<!-- 장바구니에 상품을 담고자 한다면 장바구니에 담기 버튼 생성해서 담아주기 -->
+					<form th:action="@{/cart/add}" method="post">
+						<input type="hidden" name="productId" th:value="${product.id}"/>
+						<button type="submit">add cart</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
